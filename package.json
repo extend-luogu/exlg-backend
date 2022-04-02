@@ -1,0 +1,22 @@
+{
+  "name": "exlg-badge",
+  "version": "0.0.1",
+  "description": "Back End of EXLG Badge",
+  "main": "index.js",
+  "repository": "https://github.com/wxh06/exlg-badge.git",
+  "author": "汪心禾 <wangxinhe06@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "express": "^4.17.3",
+    "redis": "^4.0.6"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint-config-airbnb-base": "latest",
+    "eslint-plugin-import": "^2.25.2"
+  }
+}
