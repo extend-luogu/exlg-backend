@@ -16,11 +16,11 @@ client.connect();
 app.use(express.json());
 
 app.get('/get', async (req, res) => {
-  res.send(dict(req.body, await Promise.all(req.body.map((k) => client.get(`${namespace}:${k}:${key}`)))));
+  res.send(dict(req.body, await client.mGet(req.body.map((k) => `${namespace}:${k}:${key}`))));
 });
 
 app.get('/set', async (req, res) => {
-  await Promise.all(Object.entries(req.body).map(([k, v]) => client.set(`${namespace}:${k}:${key}`, v)));
+  await client.mSet(dict(Object.keys(req.body).map((k) => `${namespace}:${k}:${key}`), Object.values(req.body)));
   res.send(req.body);
 });
 
