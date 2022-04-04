@@ -8,6 +8,7 @@ from redis import Redis
 from utils import get_paste_id, json_dumps, json_loads
 
 NAMESPACE = "exlg"
+ACTIVATION_KEY = "activation"
 BADGE_KEY = "badge"
 TOKEN_KEY = "token"
 TRUE = "\0"
@@ -91,6 +92,13 @@ def badge_mset():
 @app.route("/badge/set/", methods=["POST"])
 @token_required
 def badge_set():
+    if not redis.exists(badge_of(request.json["uid"])) and (
+        "activation" not in request.json
+        or not redis.lrem(
+            key_to(ACTIVATION_KEY), 1, request.json["activation"]
+        )
+    ):
+        return jsonify({"error": "Activation failed"}), 403
     redis.set(
         badge_of(request.json["uid"]),
         json_dumps(request.json["data"]),

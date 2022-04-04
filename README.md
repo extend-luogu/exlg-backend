@@ -146,11 +146,22 @@ Content-Type: application/json
 
 ### Request
 
-Payload 对象中键 `data` 的值为一个描述 badge 内容与样式的对象
+若 badge 不存在，则 Payload 对象中键 `activation` 的值必须为合法的激活密钥；键 `data` 的值为一个描述 badge 内容与样式的对象
 
 ```http
 POST /badge/set/
 Content-Type: application/j son
+```
+
+```json
+{
+    "uid": 108135,
+    "token": "0123456789abcdef0123456789abcdef",
+    "activation": "<exlgactivationkey>",
+    "data": {
+        "text": "wxh"
+    }
+}
 ```
 
 ```json
