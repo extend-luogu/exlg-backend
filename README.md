@@ -13,7 +13,7 @@ Back End of [EXLG](https://github.com/extend-luogu) Badge
 ### Requset
 
 ```http
-GET /token/
+GET /token/generate/
 ```
 
 ### Response

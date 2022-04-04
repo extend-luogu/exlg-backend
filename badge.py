@@ -44,8 +44,8 @@ def admin_required(func):
     return wrapper
 
 
-@app.route("/token/")
-def token():
+@app.route("/token/generate/")
+def token_generation():
     uuid = uuid4().hex
     redis.set(key_to(TOKEN_KEY, uuid), TRUE, ex=60)
     return jsonify(uuid)
