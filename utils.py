@@ -25,4 +25,4 @@ def get_paste_id(data):
         and paste_id
     ):
         return paste_id[1]
-    raise ValueError("Invalid paste ID or URL")
+    raise ValueError("Invalid paste ID or URL: " + repr(data))
