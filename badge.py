@@ -1,3 +1,4 @@
+import json
 import re
 from functools import partial
 from urllib.parse import urlsplit
@@ -66,10 +67,20 @@ def token_verification():
     return jsonify({"error": f"Invalid paste content: {paste['data']}"}), 403
 
 
+def json_loads(data):
+    if data is not None:
+        return json.loads(data)
+    return {}
+
+
+def json_dumps(data):
+    return json.dumps(data, separators=(",", ":"))
+
+
 @app.route("/badge/mget/", methods=["POST"])
 def badge_mget():
     q = set(request.json)
-    return jsonify(dict(zip(q, redis.mget(map(badge_of, q)))))
+    return jsonify(dict(zip(q, map(json_loads, redis.mget(map(badge_of, q))))))
 
 
 @app.route("/badge/mset/", methods=["POST"])
@@ -78,7 +89,14 @@ def badge_mset():
         key_to(request.json["uid"], request.json["token"])
     ) and redis.get(key_to(request.json["uid"], "admin")):
         data = request.json["data"]
-        redis.mset(dict(zip(map(badge_of, data.keys()), data.values())))
+        redis.mset(
+            dict(
+                zip(
+                    map(badge_of, data.keys()),
+                    map(json_dumps, data.values()),
+                )
+            )
+        )
         return jsonify(data)
     else:
         return jsonify({"error": "Access denied"}), 403
@@ -87,7 +105,10 @@ def badge_mset():
 @app.route("/badge/set/", methods=["POST"])
 def badge_set():
     if redis.get(key_to(request.json["uid"], request.json["token"])):
-        redis.set(badge_of(request.json["uid"]), request.json["data"])
+        redis.set(
+            badge_of(request.json["uid"]),
+            json_dumps(request.json["data"]),
+        )
         return jsonify({(request.json["uid"]): request.json["data"]})
     else:
         return jsonify({"error": "Access denied"}), 403
