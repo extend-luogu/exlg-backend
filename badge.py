@@ -26,7 +26,11 @@ redis = Redis(decode_responses=True)
 
 def token_required(func):
     def wrapper(*args, **kwargs):
-        if redis.get(key_to(request.json["uid"], request.json["token"])):
+        if (
+            "uid" in request.json
+            and "token" in request.json
+            and redis.get(key_to(request.json["uid"], request.json["token"]))
+        ):
             return func(*args, **kwargs)
         return jsonify({"error": "Access denied"}), 403
 
