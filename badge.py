@@ -52,7 +52,7 @@ def token_generation():
     return jsonify(uuid)
 
 
-@app.route("/token/verify/")
+@app.route("/token/verify/", methods=["POST"])
 def token_verification():
     try:
         paste_id = get_paste_id(request.json)
