@@ -58,6 +58,40 @@ Content-Type: application/json
 }
 ```
 
+## 检查 token 状态
+
+### Request
+
+Payload 即为 `/token/verify/` 响应中的 JSON 对象
+
+```http
+POST /token/status/
+Content-Type: application/json
+```
+
+```json
+{
+    "uid": 108135,
+    "token": "0123456789abcdef0123456789abcdef"
+}
+```
+
+### Response
+
+响应 HTTP 状态码为 `200 OK` 时，内容为 JSON 字符串 `"OK"`
+
+```json
+"OK"
+```
+
+响应 HTTP 状态码为 `401 Unauthorized` 时，内容为一个包含错误信息的 JSON 对象
+
+```json
+{
+    "error": "Authentication failed"
+}
+```
+
 ## 批量获取 badge
 
 ### Request

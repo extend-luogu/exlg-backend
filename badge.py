@@ -77,6 +77,12 @@ def token_verification():
     return jsonify({"error": f"Invalid paste content: {paste['data']}"}), 403
 
 
+@app.route("/token/status/", methods=["POST"])
+@token_required
+def token_status():
+    return jsonify("OK")
+
+
 @app.route("/badge/mget/", methods=["POST"])
 def badge_mget():
     q = set(request.json)
