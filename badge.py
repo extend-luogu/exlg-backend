@@ -32,7 +32,7 @@ def token_required(func):
             and redis.get(key_to(request.json["uid"], request.json["token"]))
         ):
             return func(*args, **kwargs)
-        return jsonify({"error": "Access denied"}), 403
+        return jsonify({"error": "Authentication failed"}), 401
 
     wrapper.__name__ = func.__name__
     return wrapper
@@ -61,14 +61,14 @@ def token_verification():
     try:
         paste_id = get_paste_id(request.json)
     except (ValueError, TypeError) as e:
-        return jsonify({"error": repr(e)}), 400
+        return jsonify({"error": repr(e)}), 422
     r = requests.get(
         "https://www.luogu.com.cn/paste/" + paste_id,
         headers={"user-agent": USER_AGENT, "x-luogu-type": "content-only"},
     )
     data = r.json()
     if r.status_code >= 400 or data["code"] >= 400:
-        return jsonify({"error": data["currentData"]["errorMessage"]}), 403
+        return jsonify({"error": data["currentData"]["errorMessage"]}), 422
     paste = data["currentData"]["paste"]
     if redis.get(key_to(TOKEN_KEY, paste["data"])):
         redis.delete(key_to(TOKEN_KEY, paste["data"]))
@@ -102,7 +102,7 @@ def badge_set():
             key_to(ACTIVATION_KEY), 1, request.json["activation"]
         )
     ):
-        return jsonify({"error": "Activation failed"}), 403
+        return jsonify({"error": "Activation failed"}), 402
     redis.set(
         badge_of(request.json["uid"]),
         json_dumps(request.json["data"]),
