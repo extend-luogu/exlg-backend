@@ -11,6 +11,7 @@ NAMESPACE = "exlg"
 ACTIVATION_KEY = "activation"
 BADGE_KEY = "badge"
 TOKEN_KEY = "token"
+TOKEN_EXPIRE = 60 * 60 * 24 * 3  # Expires in 3 days
 TRUE = "\0"
 USER_AGENT = ""
 
@@ -72,7 +73,9 @@ def token_verification():
     paste = data["currentData"]["paste"]
     if redis.get(key_to(TOKEN_KEY, paste["data"])):
         redis.delete(key_to(TOKEN_KEY, paste["data"]))
-        redis.set(key_to(paste["user"]["uid"], paste["data"]), TRUE)
+        redis.set(
+            key_to(paste["user"]["uid"], paste["data"]), TRUE, ex=TOKEN_EXPIRE
+        )
         return jsonify({"token": paste["data"], "uid": paste["user"]["uid"]})
     return jsonify({"error": f"Invalid paste content: {paste['data']}"}), 403
 
