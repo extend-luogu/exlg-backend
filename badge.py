@@ -80,10 +80,12 @@ def token_verification():
     return jsonify({"error": f"Invalid paste content: {paste['data']}"}), 403
 
 
-@app.route("/token/status/", methods=["POST"])
+@app.route("/token/ttl/", methods=["POST"])
 @token_required
 def token_status():
-    return jsonify("OK")
+    return jsonify(
+        redis.ttl(key_to(request.json["uid"], request.json["token"]))
+    )
 
 
 @app.route("/badge/mget/", methods=["POST"])

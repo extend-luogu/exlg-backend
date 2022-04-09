@@ -58,14 +58,14 @@ Content-Type: application/json
 }
 ```
 
-## 检查 token 状态
+## 检查 token 有效期
 
 ### Request
 
 Payload 即为 `/token/verify/` 响应中的 JSON 对象
 
 ```http
-POST /token/status/
+POST /token/ttl/
 Content-Type: application/json
 ```
 
@@ -78,10 +78,10 @@ Content-Type: application/json
 
 ### Response
 
-响应 HTTP 状态码为 `200 OK` 时，内容为 JSON 字符串 `"OK"`
+响应 HTTP 状态码为 `200 OK` 时，内容为一个整数，表示到过期时间的秒数
 
 ```json
-"OK"
+259199
 ```
 
 响应 HTTP 状态码为 `401 Unauthorized` 时，内容为一个包含错误信息的 JSON 对象
