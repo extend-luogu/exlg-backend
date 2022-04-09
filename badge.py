@@ -12,6 +12,7 @@ ACTIVATION_KEY = "activation"
 BADGE_KEY = "badge"
 TOKEN_KEY = "token"
 TOKEN_EXPIRE = 60 * 60 * 24 * 3  # Expires in 3 days
+MAX_CONTENT_LENGTH = 2048  # 2KiB
 TRUE = "\0"
 USER_AGENT = ""
 
@@ -45,6 +46,17 @@ def admin_required(func):
         if redis.get(key_to(request.json["uid"], "admin")):
             return func(*args, **kwargs)
         return jsonify({"error": "Access denied"}), 403
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+def content_length_limited(func):
+    @token_required
+    def wrapper(*args, **kwargs):
+        if request.content_length > MAX_CONTENT_LENGTH:
+            return jsonify({"error": "Payload too large"}), 413
+        return func(*args, **kwargs)
 
     wrapper.__name__ = func.__name__
     return wrapper
@@ -105,15 +117,24 @@ def badge_mset():
 
 
 @app.route("/badge/set/", methods=["POST"])
+@content_length_limited
 @token_required
 def badge_set():
-    if not redis.exists(badge_of(request.json["uid"])) and (
-        "activation" not in request.json
-        or not redis.lrem(
-            key_to(ACTIVATION_KEY), 1, request.json["activation"]
+    if (
+        not redis.get(key_to(request.json["uid"], "admin"))
+        and not redis.exists(badge_of(request.json["uid"]))
+        and (
+            "activation" not in request.json
+            or not redis.lrem(
+                key_to(ACTIVATION_KEY), 1, request.json["activation"]
+            )
         )
     ):
         return jsonify({"error": "Activation failed"}), 402
+    if "data" not in request.json or "text" not in request.json["data"]:
+        return jsonify({"error": "Badge data is invalid"}), 422
+    if len(request.json["data"]["text"]) > 16:
+        return jsonify({"error": "Badge is too long"}), 422
     redis.set(
         badge_of(request.json["uid"]),
         json_dumps(request.json["data"]),
