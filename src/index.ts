@@ -22,7 +22,7 @@ app.use(express.json());
 const respond = (
   res: express.Response,
   status: number,
-  data: string | { [key: string]: any } | undefined,
+  data: string | number | { [key: string]: any } | undefined,
 ) => {
   res.status(status).json(
     data ? ({ status, ...(status < 400 ? { data } : { error: data }) }) : { status },
@@ -32,7 +32,7 @@ const respond = (
 const tokenReuired = async (req: Request, res: Response, next: NextFunction) => (
   'uid' in req.body && 'token' in req.body
     && (await redis.get(`${namespace}:token:${req.body.token}`) === req.body.uid as string)
-    ? next() : respond(res, 403, 'Invalid token')
+    ? next() : respond(res, 401, 'Authentication failed')
 );
 
 app.get('/token/generate', async (_req, res) => {
@@ -63,8 +63,8 @@ app.get('/token/verify/:paste', async (req, res) => {
   }
 });
 
-app.get('/token/ttl', tokenReuired, async (req, res) => {
-  respond(res, 200, redis.ttl(`${namespace}:token:${req.body.token}`));
+app.post('/token/ttl', tokenReuired, async (req, res) => {
+  respond(res, 200, await redis.ttl(`${namespace}:token:${req.body.token}`));
 });
 
 app.post('/badge/mget', async (req, res) => {
