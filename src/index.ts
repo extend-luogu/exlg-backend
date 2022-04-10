@@ -50,7 +50,7 @@ app.get('/token/verify/:paste', async (req, res) => {
     `https://www.luogu.com.cn/paste/${paste}?_contentOnly`,
   );
   if (response.data.code >= 400) {
-    respond(res, 422, response.data.currentData.errorMessage);
+    respond(res, 401, response.data.currentData.errorMessage);
   } else {
     const data = response.data.currentData.paste;
     data.data = data.data.trim();

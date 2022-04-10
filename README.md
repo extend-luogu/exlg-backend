@@ -1,10 +1,12 @@
 # exlg-badge
 
-Back End of [EXLG](https://github.com/extend-luogu) Badge
+Back End of ['Extend Luogu'](https://github.com/extend-luogu/extend-luogu)
 
 ## Overview
 
-请求中 `uid` 的数据格式为整数或字符串均可，但同一数组中要求数据类型保持一致
+请求的 base URL 为 `https://exlg.piterator.com`
+
+请求中 `uid` 的数据格式为整数或字符串均可
 
 响应中对象的所有键均为字符串
 
@@ -13,48 +15,58 @@ Back End of [EXLG](https://github.com/extend-luogu) Badge
 ### Requset
 
 ```http
-GET /token/generate/
+GET /token/generate
+Host: exlg.piterator.com
 ```
 
 ### Response
 
-32 位字符串
+`data` 为一个 32 位字符串
 
 ```json
-"0123456789abcdef0123456789abcdef"
+{
+    "status": 200,
+    "data": "0123456789abcdef0123456789abcdef"
+}
 ```
 
 ## 验证 token
 
 ### Requset
 
-Payload 为剪贴板 ID 或 URL
+URL 结尾包含的参数为剪贴板 ID
 
 ```http
-POST /token/verify/
+GET /token/verify/:paste
+Host: exlg.piterator.com
 Content-Type: application/json
-```
-
-```json
-"https://www.luogu.com.cn/paste/k2b0dyio"
-```
-
-```json
-"//www.luogu.org/paste/k2b0dyio"
-```
-
-```json
-"k2b0dyio"
 ```
 
 ### Response
 
-一个包含 `uid` 与 `token` 的对象
+`data` 为一个包含 `uid` 与 `token` 的对象
 
 ```json
 {
-    "uid": 108135,
-    "token": "0123456789abcdef0123456789abcdef"
+    "status": 200,
+    "data": {
+        "uid": 108135,
+        "token": "0123456789abcdef0123456789abcdef"
+    }
+}
+```
+
+```json
+{
+    "status": 401,
+    "error": "剪贴板内容未找到"
+}
+```
+
+```json
+{
+    "status": 403,
+    "error": "Invalid paste content: "
 }
 ```
 
@@ -62,10 +74,11 @@ Content-Type: application/json
 
 ### Request
 
-Payload 即为 `/token/verify/` 响应中的 JSON 对象
+Payload 即为 `/token/verify/:paste` 响应中的 `data`
 
 ```http
-POST /token/ttl/
+POST /token/ttl
+Host: exlg.piterator.com
 Content-Type: application/json
 ```
 
@@ -78,16 +91,20 @@ Content-Type: application/json
 
 ### Response
 
-响应 HTTP 状态码为 `200 OK` 时，内容为一个整数，表示到过期时间的秒数
-
-```json
-259199
-```
-
-响应 HTTP 状态码为 `401 Unauthorized` 时，内容为一个包含错误信息的 JSON 对象
+响应 HTTP 状态码为 `200 OK` 时，`data` 为一个整数，表示到过期时间的秒数
 
 ```json
 {
+    "status": 200,
+    "data": 259199
+}
+```
+
+响应 HTTP 状态码为 `401 Unauthorized` 时，`data` 为一个包含错误信息的 JSON 对象
+
+```json
+{
+    "status": 401,
     "error": "Authentication failed"
 }
 ```
@@ -96,18 +113,16 @@ Content-Type: application/json
 
 ### Request
 
-Payload 为一个包含字符串或整数的数组，注意：类型必须一致
+Payload 为一个包含字符串或整数的数组
 
 ```http
-POST /badge/mget/
+POST /badge/mget
+Host: exlg.piterator.com
 Content-Type: application/json
-```
-```json
-["", "108135", "224978"]
 ```
 
 ```json
-[108135, 224978]
+["", 108135, 224978]
 ```
 
 ### Response
@@ -116,59 +131,19 @@ Content-Type: application/json
 
 ```json
 {
-    "": {},
-    "108135": {
-        "size": 1,
-        "text": "wxh"
-    },
-    "224978": {
-        "text": "o2"
-    }
-}
-```
-
-## 批量修改 badge
-
-`@admin_required`
-要求 EXLG 数据库管理员权限
-
-### Request
-
-Payload 对象中键 `data` 的值为对象，格式与 `/badge/mget/` 响应相同
-
-```http
-POST /badge/mset/
-Content-Type: application/json
-```
-
-```json
-{
-    "uid": 108135,
-    "token": "0123456789abcdef0123456789abcdef",
+    "status": 200,
     "data": {
+        "": {},
         "108135": {
             "text": "wxh",
-            "size": 1
+            "bg": "",
+            "fg": ""
         },
         "224978": {
-            "text": "o2"
+            "text": "o2",
+            "bg": "",
+            "fg": ""
         }
-    }
-}
-```
-
-### Respond
-
-即 Payload JSON 对象中键 `data` 的值
-
-```json
-{
-    "108135": {
-        "size": 1,
-        "text": "wxh"
-    },
-    "224978": {
-        "text": "o2"
     }
 }
 ```
@@ -183,7 +158,8 @@ Content-Type: application/json
 若 badge 不存在，则 Payload 对象中键 `activation` 的值必须为合法的激活密钥；键 `data` 的值为一个描述 badge 内容与样式的对象
 
 ```http
-POST /badge/set/
+POST /badge/set
+Host: exlg.piterator.com
 Content-Type: application/j son
 ```
 
@@ -193,7 +169,8 @@ Content-Type: application/j son
     "token": "0123456789abcdef0123456789abcdef",
     "activation": "<exlgactivationkey>",
     "data": {
-        "text": "wxh"
+        "text": "wxh",
+        "bg": ""
     }
 }
 ```
@@ -203,21 +180,23 @@ Content-Type: application/j son
     "uid": 108135,
     "token": "0123456789abcdef0123456789abcdef",
     "data": {
-        "text": "wxh",
-        "size": 1
+        "text": "wxh"
     }
 }
 ```
 
 ### Response
 
-与 `/badge/mset/` 响应对象的格式相同，仍为 object，但仅包含单个用户的数据，键为字符串 `uid`
+`data` 与 `/badge/mget` 响应对象的格式相同，但仅包含单个用户的数据，键为字符串 `uid`，且表示 badge 内容的对象仅包含设置/修改的键
 
 ```json
 {
-    "108135": {
-        "size": 1,
-        "text": "wxh"
+    "status": 200,
+    "data": {
+        "108135": {
+            "text": "wxh",
+            "bg": ""
+        }
     }
 }
 ```
