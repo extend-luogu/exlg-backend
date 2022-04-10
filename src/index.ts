@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 import { nanoid } from 'nanoid';
 import { createClient } from 'redis';
@@ -29,11 +29,13 @@ const respond = (
   );
 };
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+const tokenReuired = async (req: Request, res: Response, next: NextFunction) => (
+  'uid' in req.body && 'token' in req.body
+    && (await redis.get(`${namespace}:token:${req.body.token}`) === req.body.uid as string)
+    ? next() : respond(res, 403, 'Invalid token')
+);
 
-app.get('/token/generate/', async (req, res) => {
+app.get('/token/generate', async (_req, res) => {
   const token = nanoid();
   await redis.set(`${namespace}:token:${token}`, trueValue, { EX: 60 });
   respond(res, 200, token);
@@ -61,7 +63,11 @@ app.get('/token/verify/:paste', async (req, res) => {
   }
 });
 
-app.post('/badge/mget/', async (req, res) => {
+app.get('/token/ttl', tokenReuired, async (req, res) => {
+  respond(res, 200, redis.ttl(`${namespace}:token:${req.body.token}`));
+});
+
+app.post('/badge/mget', async (req, res) => {
   const uids: Array<string | number> = req.body;
   const badges = await Promise.all(
     uids.map((k) => redis.hGetAll(`${namespace}:${k}:badge`)),
@@ -71,25 +77,22 @@ app.post('/badge/mget/', async (req, res) => {
   ));
 });
 
-app.post(
-  '/badge/set/',
-  async (req, res, next) => (
-    'uid' in req.body && 'token' in req.body
-    && (await redis.get(`${namespace}:token:${req.body.token}`) === req.body.uid as string)
-      ? next() : respond(res, 403, 'Invalid token')
-  ),
-  async (req, res, next) => (
-    'data' in req.body ? next() : respond(res, 422, 'Missing data')
-  ),
-  async (req, res) => {
-    redis.hSet(
-      `${namespace}:${req.body.uid}:badge`,
-      'text',
-      req.body.data.text,
-    );
-    respond(res, 200, 'OK');
-  },
-);
+app.post('/badge/set', tokenReuired, async (req, res, next) => (
+  'data' in req.body ? next() : respond(res, 422, 'Missing data')
+), async (req, res, next) => (
+  await redis.exists(`${namespace}:${req.body.uid}:badge`)
+  || ('activation' in req.body
+    && await redis.lRem(`${namespace}:activation`, 1, req.body.activation)
+  ) ? next() : respond(res, 402, 'Invalid activation')
+), async (req, res) => {
+  redis.hSet(
+    `${namespace}:${req.body.uid}:badge`,
+    ['text', req.body.data.text,
+      'bg', req.body.data.bg,
+      'fg', req.body.data.fg],
+  );
+  respond(res, 200, { [req.body.uid]: req.body.data });
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`); // eslint-disable-line no-console
