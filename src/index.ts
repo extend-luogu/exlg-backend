@@ -31,7 +31,7 @@ const respond = (
 
 const tokenReuired = async (req: Request, res: Response, next: NextFunction) => (
   'uid' in req.body && 'token' in req.body
-    && (await redis.get(`${namespace}:token:${req.body.token}`) === req.body.uid as string)
+    && (await redis.get(`${namespace}:token:${req.body.token}`) === req.body.uid.toString())
     ? next() : respond(res, 401, 'Authentication failed')
 );
 
@@ -54,9 +54,9 @@ app.get('/token/verify/:paste', async (req, res) => {
   } else {
     const data = response.data.currentData.paste;
     data.data = data.data.trim();
-    if (await redis.get(`${namespace}:token:${data.data}`) === trueValue as string) {
+    if (await redis.get(`${namespace}:token:${data.data}`) === trueValue.toString()) {
       await redis.set(`${namespace}:token:${data.data}`, data.user.uid, { EX: 60 * 60 * 24 * 3 });
-      respond(res, 200, { uid: data.user.uid, token: data.data });
+      respond(res, 200, { uid: data.user.uid.toString(), token: data.data });
     } else {
       respond(res, 403, `Invalid paste content: ${data.data}`);
     }
@@ -91,7 +91,7 @@ app.post('/badge/set', tokenReuired, async (req, res, next) => (
       'bg', req.body.data.bg,
       'fg', req.body.data.fg],
   );
-  respond(res, 200, { [req.body.uid]: req.body.data });
+  respond(res, 200, { [req.body.uid.toString()]: req.body.data });
 });
 
 app.listen(port, () => {
