@@ -1,15 +1,16 @@
 {
-  "name": "exlg-badge",
+  "name": "exlg-backend",
   "version": "0.0.1",
-  "description": "Back End of EXLG Badge",
+  "description": "Back End of EXLG",
   "main": "index.js",
-  "repository": "https://github.com/wxh06/exlg-badge.git",
+  "repository": "https://github.com/wxh06/exlg-backend.git",
   "author": "汪心禾 <wangxinhe06@gmail.com>",
   "license": "MIT",
   "private": false,
   "scripts": {
     "lint": "eslint .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "start": "node ."
   },
   "dependencies": {
     "express": "^4.17.3",
