@@ -9,7 +9,7 @@
   "private": false,
   "scripts": {
     "build": "tsc",
-    "lint": "eslint .",
+    "lint": "eslint --ext js --ext ts .",
     "prepare": "husky install",
     "start": "node ."
   },
