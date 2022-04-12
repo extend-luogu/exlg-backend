@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 import { nanoid } from 'nanoid';
 import { createClient } from 'redis';
+import validateColor from 'validate-color';
 
 type Paste = import('luogu-api-docs/luogu-api').Paste;
 type PasteDataResponse = import('luogu-api-docs/luogu-api').DataResponse<{
@@ -77,15 +78,28 @@ app.post('/badge/mget', async (req, res) => {
   ));
 });
 
-app.post('/badge/set', tokenReuired, async (req, res, next) => (
+app.post('/badge/set', tokenReuired, (req, res, next) => (
   'data' in req.body ? next() : respond(res, 422, 'Missing data')
-), async (req, res, next) => (
+), (req, res, next) => {
+  const error: string[] = [];
+  if (req.body.data.text.length > 16) {
+    error.push('Badge is too long');
+  } if (!validateColor(req.body.data.bg) || !validateColor(req.body.data.fg)) {
+    error.push('Invalid color');
+  }
+  if (error.length) {
+    respond(res, 422, error.join(', '));
+  } else {
+    req.body.data.text = req.body.data.text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    next();
+  }
+}, async (req, res, next) => (
   await redis.exists(`${namespace}:${req.body.uid}:badge`)
   || ('activation' in req.body
     && await redis.lRem(`${namespace}:activation`, 1, req.body.activation)
   ) ? next() : respond(res, 402, 'Invalid activation')
 ), async (req, res) => {
-  redis.hSet(
+  await redis.hSet(
     `${namespace}:${req.body.uid}:badge`,
     ['text', req.body.data.text,
       'bg', req.body.data.bg,
