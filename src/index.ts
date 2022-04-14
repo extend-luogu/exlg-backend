@@ -84,7 +84,7 @@ app.post('/badge/set', tokenReuired, (req, res, next) => (
   const error: string[] = [];
   if (req.body.data.text.length > 16) {
     error.push('Badge is too long');
-  } if (!validateColor(req.body.data.bg) || !validateColor(req.body.data.fg)) {
+  } if (!validateColor(req.body.data.fg)) {
     error.push('Invalid color');
   }
   if (error.length) {
