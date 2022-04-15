@@ -95,9 +95,9 @@ app.post('/badge/set', tokenReuired, (req, res, next) => (
   }
 }, async (req, res, next) => (
   await redis.exists(`${namespace}:${req.body.uid}:badge`)
-  || ('activation' in req.body
-    && await redis.lRem(`${namespace}:activation`, 1, req.body.activation)
-  ) ? next() : respond(res, 402, 'Invalid activation')
+    || ('activation' in req.body
+      && await redis.lRem(`${namespace}:activation`, 1, req.body.activation)
+    ) ? next() : respond(res, 402, 'Invalid activation')
 ), async (req, res) => {
   await redis.hSet(
     `${namespace}:${req.body.uid}:badge`,
