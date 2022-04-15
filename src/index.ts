@@ -10,7 +10,6 @@ type PasteDataResponse = import('luogu-api-docs/luogu-api').DataResponse<{
 }>;
 
 const namespace = 'exlg';
-const trueValue = '\0';
 const port = process.env.PORT || 3000;
 
 const app = express();
@@ -38,7 +37,7 @@ const tokenReuired = async (req: Request, res: Response, next: NextFunction) => 
 
 app.get('/token/generate', async (_req, res) => {
   const token = nanoid();
-  await redis.set(`${namespace}:token:${token}`, trueValue, { EX: 60 });
+  await redis.set(`${namespace}:token:${token}`, '0', { EX: 60 });
   respond(res, 200, token);
 });
 
@@ -55,7 +54,7 @@ app.get('/token/verify/:paste', async (req, res) => {
   } else {
     const data = response.data.currentData.paste;
     data.data = data.data.trim();
-    if (await redis.get(`${namespace}:token:${data.data}`) === trueValue.toString()) {
+    if (await redis.get(`${namespace}:token:${data.data}`) === '0') {
       await redis.set(`${namespace}:token:${data.data}`, data.user.uid, { EX: 60 * 60 * 24 * 3 });
       respond(res, 200, { uid: data.user.uid.toString(), token: data.data });
     } else {
