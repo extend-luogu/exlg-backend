@@ -34,11 +34,15 @@ const respond = (
   );
 };
 
-const tokenReuired = async (req: Request, res: Response, next: NextFunction) => (
-  'uid' in req.body && 'token' in req.body
+const tokenReuired = async (req: Request, res: Response, next: NextFunction) => {
+  if ('uid' in req.body && 'token' in req.body
     && (await redis.get(`${namespace}:token:${req.body.token}`) === req.body.uid.toString())
-    ? next() : respond(res, 401, 'Authentication failed')
-);
+  ) {
+    if (!(await redis.get(`${namespace}:${req.body.uid}:blacklisted`))) {
+      next();
+    } else respond(res, 403, "You've been blacklisted! Please contact the admin.");
+  } else respond(res, 401, 'Authentication failed');
+};
 
 app.get('/token/generate', async (_req, res) => {
   const token = nanoid();
@@ -72,8 +76,8 @@ app.post('/token/ttl', tokenReuired, async (req, res) => {
   respond(res, 200, await redis.ttl(`${namespace}:token:${req.body.token}`));
 });
 
-app.post('/badge/mget', async (req, res) => {
-  const uids: Array<string | number> = req.body;
+app.post('/badge/mget', tokenReuired, async (req, res) => {
+  const { data: uids }: { data: Array<string | number> } = req.body;
   const badges = await Promise.all(
     uids.map((k) => redis.hGetAll(`${namespace}:${k}:badge`)),
   );

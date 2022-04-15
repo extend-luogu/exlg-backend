@@ -111,9 +111,12 @@ Content-Type: application/json
 
 ## 批量获取 badge
 
+`@token_required`
+要求 Payload 同时包含 `token` 以及其对应的 `uid`
+
 ### Request
 
-Payload 为一个包含字符串或整数的数组
+Payload 的 `data` 为一个包含字符串或整数的数组
 
 ```http
 POST /badge/mget
@@ -122,12 +125,20 @@ Content-Type: application/json
 ```
 
 ```json
-["", 108135, 224978]
+{
+    "uid": "108135",
+    "token": "a",
+    "data": [
+        "",
+        108135,
+        "224978"
+    ]
+}
 ```
 
 ### Response
 
-对象：键为字符串 `uid`；值为描述 badge 的对象，其中键为字符串，值的类型由设置时的内容决定
+对象：键为字符串 `uid`；值为描述 badge 的对象，其中键、值的类型均为字符串
 
 ```json
 {
@@ -151,7 +162,6 @@ Content-Type: application/json
 ## 修改 badge
 
 `@token_required`
-要求同时包含 `token` 以及其对应的 `uid`
 
 ### Request
 
