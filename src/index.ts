@@ -19,6 +19,11 @@ redis.connect();
 
 app.use(express.json());
 
+app.use((_req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
+
 const respond = (
   res: express.Response,
   status: number,
