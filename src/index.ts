@@ -107,12 +107,14 @@ app.post('/badge/set', tokenReuired, (req, res, next) => (
       && await redis.lRem(`${namespace}:activation`, 1, req.body.activation)
     ) ? next() : respond(res, 402, 'Invalid activation')
 ), async (req, res) => {
-  await redis.hSet(
-    `${namespace}:${req.body.uid}:badge`,
-    ['text', req.body.data.text,
-      'bg', req.body.data.bg,
-      'fg', req.body.data.fg],
-  );
+  await redis.hSet(`${namespace}:${req.body.uid}:badge`, [
+    'text', req.body.data.text,
+    'bg', req.body.data.bg,
+    'fg', req.body.data.fg,
+    'fw', req.body.data.fw,
+    'font', req.body.data.font,
+    'border', req.body.data.border,
+  ]);
   respond(res, 200, { [req.body.uid.toString()]: req.body.data });
 });
 
