@@ -110,7 +110,7 @@ app.post('/badge/set', tokenReuired, dataRequired, (req: BadgeSetRequest, res, n
   if (error.length) {
     respond(res, 422, error.join(', '));
   } else {
-    req.body.data.text = req.body.data.text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    req.body.data.text = req.body.data.text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
     next();
   }
 }, activationRequired, async (req: BadgeSetRequest, res) => {
