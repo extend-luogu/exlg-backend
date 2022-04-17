@@ -3,11 +3,11 @@ import axios from 'axios';
 import { nanoid } from 'nanoid';
 import { createClient } from 'redis';
 import validateColor from 'validate-color';
-
-type Paste = import('luogu-api-docs/luogu-api').Paste;
-type PasteDataResponse = import('luogu-api-docs/luogu-api').DataResponse<{
-  paste: Paste, errorMessage: string,
-}>;
+import type {
+  PasteDataResponse,
+  TokenRequiredRequest, ActivationRequiredRequest,
+  TokenTTLRequest, BadgeMGetRequest, BadgeSetRequest,
+} from './types';
 
 const namespace = 'exlg';
 const port = process.env.PORT || 3000;
@@ -25,7 +25,7 @@ app.use((_req, res, next) => {
 });
 
 const respond = (
-  res: express.Response,
+  res: Response,
   status: number,
   data: string | number | { [key: string]: any } | undefined,
 ) => {
@@ -34,8 +34,8 @@ const respond = (
   );
 };
 
-const tokenReuired = async (req: Request, res: Response, next: NextFunction) => {
-  if ('uid' in req.body && 'token' in req.body
+const tokenReuired = async (req: TokenRequiredRequest, res: Response, next: NextFunction) => {
+  if (req.body.uid && req.body.token
     && (await redis.get(`${namespace}:token:${req.body.token}`) === req.body.uid.toString())
   ) {
     if (!(await redis.get(`${namespace}:${req.body.uid}:blacklisted`))) {
@@ -43,6 +43,20 @@ const tokenReuired = async (req: Request, res: Response, next: NextFunction) => 
     } else respond(res, 403, "You've been blacklisted! Please contact the admin.");
   } else respond(res, 401, 'Authentication failed');
 };
+
+const activationRequired = async (
+  req: ActivationRequiredRequest,
+  res: Response,
+  next: NextFunction,
+) => (
+  await redis.exists(`${namespace}:${req.body.uid}:badge`)
+    || (req.body.activation && await redis.lRem(`${namespace}:activation`, 1, req.body.activation))
+    ? next() : respond(res, 402, 'Invalid activation')
+);
+
+const dataRequired = (req: Request, res: Response, next: NextFunction) => (
+  req.body.data ? next() : respond(res, 422, 'Missing data')
+);
 
 app.get('/token/generate', async (_req, res) => {
   const token = nanoid();
@@ -72,12 +86,12 @@ app.get('/token/verify/:paste', async (req, res) => {
   }
 });
 
-app.post('/token/ttl', tokenReuired, async (req, res) => {
+app.post('/token/ttl', tokenReuired, async (req: TokenTTLRequest, res) => {
   respond(res, 200, await redis.ttl(`${namespace}:token:${req.body.token}`));
 });
 
-app.post('/badge/mget', tokenReuired, async (req, res) => {
-  const { data: uids }: { data: Array<string | number> } = req.body;
+app.post('/badge/mget', tokenReuired, dataRequired, async (req: BadgeMGetRequest, res) => {
+  const { data: uids } = req.body;
   const badges = await Promise.all(
     uids.map((k) => redis.hGetAll(`${namespace}:${k}:badge`)),
   );
@@ -86,9 +100,7 @@ app.post('/badge/mget', tokenReuired, async (req, res) => {
   ));
 });
 
-app.post('/badge/set', tokenReuired, (req, res, next) => (
-  'data' in req.body ? next() : respond(res, 422, 'Missing data')
-), (req, res, next) => {
+app.post('/badge/set', tokenReuired, dataRequired, (req: BadgeSetRequest, res, next) => {
   const error: string[] = [];
   if (req.body.data.text.length > 16) {
     error.push('Badge is too long');
@@ -101,12 +113,7 @@ app.post('/badge/set', tokenReuired, (req, res, next) => (
     req.body.data.text = req.body.data.text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
     next();
   }
-}, async (req, res, next) => (
-  await redis.exists(`${namespace}:${req.body.uid}:badge`)
-    || ('activation' in req.body
-      && await redis.lRem(`${namespace}:activation`, 1, req.body.activation)
-    ) ? next() : respond(res, 402, 'Invalid activation')
-), async (req, res) => {
+}, activationRequired, async (req: BadgeSetRequest, res) => {
   await redis.hSet(`${namespace}:${req.body.uid}:badge`, [
     'text', req.body.data.text.trim(),
     'bg', req.body.data.bg,
@@ -119,5 +126,5 @@ app.post('/badge/set', tokenReuired, (req, res, next) => (
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`); // eslint-disable-line no-console
+  console.log(`Listening on port ${port}`); // eslint-disable-line no-console
 });
