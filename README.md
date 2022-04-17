@@ -1,6 +1,6 @@
-# exlg-badge
+# exlg-backend
 
-Back End of ['Extend Luogu'](https://github.com/extend-luogu/extend-luogu)
+Back End of [Extend Luogu](https://github.com/extend-luogu/extend-luogu)
 
 ## Overview
 
