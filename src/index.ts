@@ -24,14 +24,8 @@ app.use((_req, res, next) => {
   next();
 });
 
-const respond = (
-  res: Response,
-  status: number,
-  data: string | number | { [key: string]: any } | undefined,
-) => {
-  res.status(status).json(
-    data ? ({ status, ...(status < 400 ? { data } : { error: data }) }) : { status },
-  );
+const respond = (res: Response, status: number, data: string | number | { [key: string]: any }) => {
+  res.status(status).json({ status, ...(status < 400 ? { data } : { error: data }) });
 };
 
 const tokenReuired = async (req: TokenRequiredRequest, res: Response, next: NextFunction) => {

@@ -30,7 +30,7 @@ interface TokenRequiredReqBody extends BaseReqBody {
 }
 
 interface ActivationRequiredReqBody extends TokenRequiredReqBody {
-  activation: string | undefined;
+  activation?: string;
 }
 
 interface Request<ReqBody = BaseReqBody> extends _Request {
