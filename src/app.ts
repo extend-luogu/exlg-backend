@@ -10,7 +10,6 @@ import type {
 } from './types';
 
 const namespace = 'exlg';
-const port = process.env.PORT || 3000;
 
 const app = express();
 const redis = createClient();
@@ -119,6 +118,4 @@ app.post('/badge/set', tokenReuired, dataRequired, (req: BadgeSetRequest, res, n
   respond(res, 200, { [req.body.uid.toString()]: req.body.data });
 });
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`); // eslint-disable-line no-console
-});
+export default app;
