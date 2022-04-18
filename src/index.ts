@@ -1,6 +1,8 @@
-import app, { redis } from './app';
+import EXLG from './app';
 
 const port = process.env.PORT || 3000;
+
+const { app, redis } = new EXLG();
 
 redis.connect();
 

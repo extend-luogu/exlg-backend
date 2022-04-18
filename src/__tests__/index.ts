@@ -1,14 +1,17 @@
 import supertest from 'supertest';
 import _axios from 'axios';
 import { customAlphabet, nanoid } from 'nanoid/non-secure';
-import app, { redis, namespace } from '../app';
+import EXLG from '../app';
 
-const db = 1;
+const db = parseInt(process.env.REDIS_DB || '1', 10);
 const uid = 108135; const blacklisted = 224978;
 const activation = nanoid();
 
 jest.mock('axios');
 const axios = _axios as jest.Mocked<typeof _axios>;
+
+const { app, namespace, redis } = new EXLG('');
+const request = supertest(app);
 
 beforeAll(async () => {
   await redis.connect();
@@ -17,8 +20,6 @@ beforeAll(async () => {
   await redis.rPush(`${namespace}:activation`, activation);
   await redis.set(`${namespace}:${blacklisted}:blacklisted`, 'true');
 });
-
-const request = supertest(app);
 
 const pasteId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 8);
 const paste200 = (data: string, _uid: number | string = uid) => ({
@@ -59,7 +60,6 @@ const badge = (text: string = 'wxh', fg: string = 'ghostwhite') => ({
 });
 
 const generateToken = () => request.get('/token/generate');
-
 const verifyToken = async (_uid: number | string = uid) => {
   axios.get.mockResolvedValue(paste200((await generateToken()).body.data, _uid));
   return request.get(`/token/verify/${pasteId()}`);
