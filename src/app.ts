@@ -61,6 +61,7 @@ app.get('/token/verify/:paste', async (req, res) => {
   const { paste } = req.params;
   if (!paste.match(/^[0-9a-z]{8}$/)) {
     respond(res, 422, 'Invalid paste ID or URL');
+    return;
   }
   const response = await axios.get<PasteDataResponse>(
     `https://www.luogu.com.cn/paste/${paste}?_contentOnly`,
