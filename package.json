@@ -2,7 +2,7 @@
   "name": "exlg-backend",
   "version": "0.0.1",
   "description": "Back End of EXLG",
-  "main": "dist/index.js",
+  "main": "dist/app.js",
   "repository": "https://github.com/wxh06/exlg-backend.git",
   "author": "汪心禾 <wangxinhe06@gmail.com>",
   "license": "MIT",
