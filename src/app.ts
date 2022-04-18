@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
-import { nanoid } from 'nanoid';
+import { nanoid } from 'nanoid/non-secure';
 import { createClient } from 'redis';
 import validateColor from 'validate-color';
 import type {
@@ -13,8 +13,6 @@ const namespace = 'exlg';
 
 const app = express();
 const redis = createClient();
-
-redis.connect();
 
 app.use(express.json());
 
@@ -120,3 +118,4 @@ app.post('/badge/set', tokenReuired, dataRequired, (req: BadgeSetRequest, res, n
 });
 
 export default app;
+export { redis, namespace };
