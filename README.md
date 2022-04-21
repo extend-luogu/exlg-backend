@@ -1,5 +1,10 @@
 # exlg-backend
 
+[![Node.js CI](https://github.com/extend-luogu/exlg-backend/actions/workflows/node.js.yml/badge.svg)](https://github.com/extend-luogu/exlg-backend/actions/workflows/node.js.yml)
+[![Python application](https://github.com/extend-luogu/exlg-backend/actions/workflows/python-app.yml/badge.svg)](https://github.com/extend-luogu/exlg-backend/actions/workflows/python-app.yml)
+[![codecov](https://codecov.io/gh/extend-luogu/exlg-backend/graph/badge.svg)](https://codecov.io/gh/extend-luogu/exlg-backend)
+[![license](https://img.shields.io/github/license/extend-luogu/exlg-backend)](./LICENSE)
+
 Back End of [Extend Luogu](https://github.com/extend-luogu/extend-luogu)
 
 ## Overview
