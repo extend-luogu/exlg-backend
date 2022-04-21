@@ -127,6 +127,15 @@ test('Invalid badge', async () => {
   expect(response.body.error).toContain('Invalid color');
   expect(response.body.error).toContain('too long');
 });
+test('Empty color', async () => {
+  const response = await request.post('/badge/set').send({
+    uid,
+    token: (await verifyToken()).body.data.token,
+    data: badge('w', ''),
+  });
+  expect(response.statusCode).toBe(402);
+  expect(response.body.status).toBe(402);
+});
 test('Setting badge', async () => {
   expect(await redis.lRange(`${namespace}:activation`, 0, -1)).toContain(activation);
   const response = await request.post('/badge/set').send({

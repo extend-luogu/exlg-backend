@@ -107,7 +107,7 @@ export default (class {
       const error: string[] = [];
       if (req.body.data.text.length > 16) {
         error.push('Badge is too long');
-      } if (!validateColor(req.body.data.fg)) {
+      } if (req.body.data.fg && !validateColor(req.body.data.fg)) {
         error.push('Invalid color');
       }
       if (error.length) {
