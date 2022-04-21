@@ -42,10 +42,14 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: |
+          yarn install --frozen-lockfile
+          yarn global add codecov
       - name: Build
         run: yarn build
       - name: Lint with ESLint
         run: yarn lint
       - name: Test with Jest
-        run: yarn test
+        run: |
+          yarn test --ci --coverage
+          codecov
