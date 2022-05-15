@@ -124,6 +124,7 @@ export default (class {
         'fw', req.body.data.fw,
         'font', req.body.data.font,
         'border', req.body.data.border,
+        'pseudo', req.body.data.pseudo,
       ]);
       respond(res, 200, { [req.body.uid.toString()]: req.body.data });
     });

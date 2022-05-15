@@ -12,6 +12,7 @@ export interface Badge {
   fw: string;
   font: string;
   border: string;
+  pseudo: string;
 }
 
 type UId = number | string;
