@@ -3,11 +3,9 @@ import axios from 'axios';
 import { nanoid } from 'nanoid/non-secure';
 import { createClient } from 'redis';
 import validateColor from 'validate-color';
-import type {
-  PasteDataResponse,
-  TokenRequiredRequest, ActivationRequiredRequest,
-  TokenTTLRequest, BadgeMGetRequest, BadgeSetRequest,
-} from './types';
+import type { Paste, DataResponse } from './luogu-api-docs/luogu-api';
+
+type UId = number | string;
 
 export default (class {
   app = express();
@@ -36,7 +34,7 @@ export default (class {
       res.status(status).json({ status, ...(status < 400 ? { data } : { error: data }) });
     };
 
-    const tokenReuired = async (req: TokenRequiredRequest, res: Response, next: NextFunction) => {
+    const tokenReuired = async (req: Request, res: Response, next: NextFunction) => {
       if (req.body.uid && req.body.token
         && (await redis.get(`${namespace}:token:${req.body.token}`) === req.body.uid.toString())
       ) {
@@ -47,7 +45,7 @@ export default (class {
     };
 
     const activationRequired = async (
-      req: ActivationRequiredRequest,
+      req: Request,
       res: Response,
       next: NextFunction,
     ) => (
@@ -72,7 +70,7 @@ export default (class {
         respond(res, 422, 'Invalid paste ID or URL');
         return;
       }
-      const response = await axios.get<PasteDataResponse>(
+      const response = await axios.get<DataResponse<{ paste: Paste, errorMessage: string }>>(
         `https://www.luogu.com.cn/paste/${paste}?_contentOnly`,
       );
       if (response.data.code >= 400) {
@@ -89,12 +87,12 @@ export default (class {
       }
     });
 
-    app.post('/token/ttl', tokenReuired, async (req: TokenTTLRequest, res) => {
+    app.post('/token/ttl', tokenReuired, async (req, res) => {
       respond(res, 200, await redis.ttl(`${namespace}:token:${req.body.token}`));
     });
 
-    app.post('/badge/mget', tokenReuired, dataRequired, async (req: BadgeMGetRequest, res) => {
-      const { data: uids } = req.body;
+    app.post('/badge/mget', tokenReuired, dataRequired, async (req, res) => {
+      const { data: uids }: { data: UId[] } = req.body;
       const badges = await Promise.all(
         uids.map((k) => redis.hGetAll(`${namespace}:${k}:badge`)),
       );
@@ -103,7 +101,7 @@ export default (class {
       ));
     });
 
-    app.post('/badge/set', tokenReuired, dataRequired, (req: BadgeSetRequest, res, next) => {
+    app.post('/badge/set', tokenReuired, dataRequired, (req, res, next) => {
       const error: string[] = [];
       if (req.body.data.text.length > 16) {
         error.push('Badge is too long');
@@ -113,19 +111,11 @@ export default (class {
       if (error.length) {
         respond(res, 422, error.join(', '));
       } else {
-        req.body.data.text = req.body.data.text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        req.body.data.text = req.body.data.text.trim().replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
         next();
       }
-    }, activationRequired, async (req: BadgeSetRequest, res) => {
-      await redis.hSet(`${namespace}:${req.body.uid}:badge`, [
-        'text', req.body.data.text.trim(),
-        'bg', req.body.data.bg,
-        'fg', req.body.data.fg,
-        'fw', req.body.data.fw,
-        'font', req.body.data.font,
-        'border', req.body.data.border,
-        'pseudo', req.body.data.pseudo,
-      ]);
+    }, activationRequired, async (req, res) => {
+      await redis.hSet(`${namespace}:${req.body.uid}:badge`, req.body.data);
       respond(res, 200, { [req.body.uid.toString()]: req.body.data });
     });
   }

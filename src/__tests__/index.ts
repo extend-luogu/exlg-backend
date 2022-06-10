@@ -142,7 +142,7 @@ test('Setting badge', async () => {
     uid,
     token: (await verifyToken()).body.data.token,
     activation,
-    data: badge(),
+    data: badge(' wxh '),
   });
   expect(response.statusCode).toBe(200);
   expect(response.body.status).toBe(200);
