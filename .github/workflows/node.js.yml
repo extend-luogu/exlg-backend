@@ -44,7 +44,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
+          cache: pnpm
       - name: Install dependencies
         run: |
           pnpm install
@@ -56,4 +56,5 @@ jobs:
       - name: Test with Jest
         run: |
           pnpm run test --ci --coverage
+          cd admin && pnpm run test:unit && cd ..
           codecov
