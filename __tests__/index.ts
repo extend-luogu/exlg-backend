@@ -1,16 +1,17 @@
-import supertest from 'supertest';
-import _axios from 'axios';
-import { customAlphabet, nanoid } from 'nanoid/non-secure';
-import EXLG from '../app';
+import supertest from "supertest";
+import _axios from "axios";
+import { customAlphabet, nanoid } from "nanoid/non-secure";
+import EXLG from "../src/app";
 
-const db = parseInt(process.env.REDIS_DB || '1', 10);
-const uid = 108135; const blacklisted = 224978;
+const db = parseInt(process.env.REDIS_DB || "1", 10);
+const uid = 108135;
+const blacklisted = 224978;
 const activation = nanoid();
 
-jest.mock('axios');
+jest.mock("axios");
 const axios = _axios as jest.Mocked<typeof _axios>;
 
-const { app, namespace, redis } = new EXLG('');
+const { app, namespace, redis } = new EXLG("");
 const request = supertest(app);
 
 beforeAll(async () => {
@@ -18,20 +19,20 @@ beforeAll(async () => {
   await redis.select(db);
   await redis.flushDb();
   await redis.rPush(`${namespace}:activation`, activation);
-  await redis.set(`${namespace}:${blacklisted}:blacklisted`, 'true');
+  await redis.set(`${namespace}:${blacklisted}:blacklisted`, "true");
 });
 
-const pasteId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 8);
+const pasteId = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 8);
 const paste200 = (data: string, _uid: number | string = uid) => ({
   data: {
     code: 200,
-    currentTemplate: 'PasteShow',
+    currentTemplate: "PasteShow",
     currentData: {
       paste: {
         data,
         user: {
           uid: _uid,
-          name: 'wangxinhe',
+          name: "wangxinhe",
         },
         time: Math.floor(Date.now() / 1000),
         public: true,
@@ -43,72 +44,79 @@ const paste200 = (data: string, _uid: number | string = uid) => ({
 const paste404 = () => ({
   data: {
     code: 404,
-    currentTemplate: 'InternalError',
+    currentTemplate: "InternalError",
     currentData: {
-      errorType: 'LuoguFramework\\HttpFoundation\\Controller\\Exception\\HttpException\\NotFoundHttpException',
-      errorMessage: '剪贴板内容未找到',
-      errorTrace: '',
+      errorType:
+        "LuoguFramework\\HttpFoundation\\Controller\\Exception\\HttpException\\NotFoundHttpException",
+      errorMessage: "剪贴板内容未找到",
+      errorTrace: "",
     },
     currentTime: Math.floor(Date.now() / 1000),
   },
 });
 
-const badge = (text: string = 'wxh', fg: string = 'ghostwhite') => ({
+const badge = (text = "wxh", fg = "ghostwhite") => ({
   text,
-  bg: 'deepskyblue',
+  bg: "deepskyblue",
   fg,
 });
 
-const generateToken = () => request.get('/token/generate');
+const generateToken = () => request.get("/token/generate");
 const verifyToken = async (_uid: number | string = uid) => {
-  axios.get.mockResolvedValue(paste200((await generateToken()).body.data, _uid));
+  axios.get.mockResolvedValue(
+    paste200((await generateToken()).body.data, _uid)
+  );
   return request.get(`/token/verify/${pasteId()}`);
 };
 
-test('Token generation', async () => {
+test("Token generation", async () => {
   const response = await generateToken();
   expect(response.statusCode).toBe(200);
   expect(response.body.status).toBe(200);
   expect(response.body.data).toHaveLength(21);
 });
 
-test('Invalid paste ID', async () => {
+test("Invalid paste ID", async () => {
   const response = await request.get(`/token/verify/${pasteId(9)}`);
   expect(response.statusCode).toBe(422);
   expect(response.body.status).toBe(422);
 });
-test('Paste 404', async () => {
+test("Paste 404", async () => {
   axios.get.mockResolvedValue(paste404());
   const response = await request.get(`/token/verify/${pasteId()}`);
   expect(response.statusCode).toBe(401);
   expect(response.body.status).toBe(401);
 });
-test('Failing token verification', async () => {
-  axios.get.mockResolvedValue(paste200(''));
+test("Failing token verification", async () => {
+  axios.get.mockResolvedValue(paste200(""));
   const response = await request.get(`/token/verify/${pasteId()}`);
   expect(response.statusCode).toBe(403);
   expect(response.body.status).toBe(403);
 });
-test('Token verification', async () => {
+test("Token verification", async () => {
   const response = await verifyToken();
   expect(response.statusCode).toBe(200);
   expect(response.body.status).toBe(200);
 });
 
-test('Token TTL', async () => {
-  const response = await request.post('/token/ttl').send({ uid, token: (await verifyToken()).body.data.token });
+test("Token TTL", async () => {
+  const response = await request
+    .post("/token/ttl")
+    .send({ uid, token: (await verifyToken()).body.data.token });
   expect(response.statusCode).toBe(200);
   expect(response.body.status).toBe(200);
   expect(response.body.data).toBeGreaterThan(0);
 });
-test('401 Paste not found', async () => {
-  const response = await request.post('/token/ttl').send({ uid, token: nanoid() });
+test("401 Paste not found", async () => {
+  const response = await request
+    .post("/token/ttl")
+    .send({ uid, token: nanoid() });
   expect(response.statusCode).toBe(401);
   expect(response.body.status).toBe(401);
 });
 
-test('Failing activation', async () => {
-  const response = await request.post('/badge/set').send({
+test("Failing activation", async () => {
+  const response = await request.post("/badge/set").send({
     uid,
     token: (await verifyToken()).body.data.token,
     data: badge(),
@@ -116,33 +124,35 @@ test('Failing activation', async () => {
   expect(response.statusCode).toBe(402);
   expect(response.body.status).toBe(402);
 });
-test('Invalid badge', async () => {
-  const response = await request.post('/badge/set').send({
+test("Invalid badge", async () => {
+  const response = await request.post("/badge/set").send({
     uid,
     token: (await verifyToken()).body.data.token,
-    data: badge('wxh wxh wxh wxh wxh', 'goatwhite'),
+    data: badge("wxh wxh wxh wxh wxh", "goatwhite"),
   });
   expect(response.statusCode).toBe(422);
   expect(response.body.status).toBe(422);
-  expect(response.body.error).toContain('Invalid color');
-  expect(response.body.error).toContain('too long');
+  expect(response.body.error).toContain("Invalid color");
+  expect(response.body.error).toContain("too long");
 });
-test('Empty color', async () => {
-  const response = await request.post('/badge/set').send({
+test("Empty color", async () => {
+  const response = await request.post("/badge/set").send({
     uid,
     token: (await verifyToken()).body.data.token,
-    data: badge('w', ''),
+    data: badge("w", ""),
   });
   expect(response.statusCode).toBe(402);
   expect(response.body.status).toBe(402);
 });
-test('Setting badge', async () => {
-  expect(await redis.lRange(`${namespace}:activation`, 0, -1)).toContain(activation);
-  const response = await request.post('/badge/set').send({
+test("Setting badge", async () => {
+  expect(await redis.lRange(`${namespace}:activation`, 0, -1)).toContain(
+    activation
+  );
+  const response = await request.post("/badge/set").send({
     uid,
     token: (await verifyToken()).body.data.token,
     activation,
-    data: badge(' wxh '),
+    data: badge(" wxh "),
   });
   expect(response.statusCode).toBe(200);
   expect(response.body.status).toBe(200);
@@ -150,8 +160,8 @@ test('Setting badge', async () => {
   expect(await redis.lRange(`${namespace}:activation`, 0, -1)).toHaveLength(0);
 });
 
-test('Getting badges', async () => {
-  const response = await request.post('/badge/mget').send({
+test("Getting badges", async () => {
+  const response = await request.post("/badge/mget").send({
     uid,
     token: (await verifyToken()).body.data.token,
     data: [uid, blacklisted],
@@ -163,16 +173,16 @@ test('Getting badges', async () => {
     [blacklisted.toString()]: {},
   });
 });
-test('Blacklisted user', async () => {
-  const response = await request.post('/badge/mget').send({
+test("Blacklisted user", async () => {
+  const response = await request.post("/badge/mget").send({
     uid: blacklisted,
     token: (await verifyToken(blacklisted)).body.data.token,
   });
   expect(response.statusCode).toBe(403);
   expect(response.body.status).toBe(403);
 });
-test('422 Missing data', async () => {
-  const response = await request.post('/badge/mget').send({
+test("422 Missing data", async () => {
+  const response = await request.post("/badge/mget").send({
     uid,
     token: (await verifyToken()).body.data.token,
   });

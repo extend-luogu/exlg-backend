@@ -8,8 +8,8 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "tsc --project ./tsconfig.build.json",
-    "lint": "eslint --ext js --ext ts .",
+    "build": "tsc",
+    "lint": "eslint --ext js,mjs,cjs,ts,vue .",
     "prepare": "husky install",
     "start": "node .",
     "test": "jest"
@@ -30,9 +30,13 @@
     "eslint": "^8.17.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
-    "husky": "^7.0.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^8.0.1",
     "jest": "^27.5.1",
+    "lint-staged": "^13.0.1",
+    "prettier": "^2.6.2",
     "supertest": "^6.2.3",
     "ts-jest": "^27.1.5",
     "typescript": "^4.7.3"

@@ -1,3 +1,7 @@
-src/luogu-api-docs/
+node_modules/
+coverage/
 dist/
-venv/
+!.*rc.js
+!.*rc.mjs
+!.*rc.cjs
+src/luogu-api-docs/

@@ -30,8 +30,8 @@ Host: exlg.piterator.com
 
 ```json
 {
-    "status": 200,
-    "data": "0123456789abcdef0123456789abcdef"
+  "status": 200,
+  "data": "0123456789abcdef0123456789abcdef"
 }
 ```
 
@@ -53,25 +53,25 @@ Content-Type: application/json
 
 ```json
 {
-    "status": 200,
-    "data": {
-        "uid": 108135,
-        "token": "0123456789abcdef0123456789abcdef"
-    }
+  "status": 200,
+  "data": {
+    "uid": 108135,
+    "token": "0123456789abcdef0123456789abcdef"
+  }
 }
 ```
 
 ```json
 {
-    "status": 401,
-    "error": "剪贴板内容未找到"
+  "status": 401,
+  "error": "剪贴板内容未找到"
 }
 ```
 
 ```json
 {
-    "status": 403,
-    "error": "Invalid paste content: "
+  "status": 403,
+  "error": "Invalid paste content: "
 }
 ```
 
@@ -89,8 +89,8 @@ Content-Type: application/json
 
 ```json
 {
-    "uid": 108135,
-    "token": "0123456789abcdef0123456789abcdef"
+  "uid": 108135,
+  "token": "0123456789abcdef0123456789abcdef"
 }
 ```
 
@@ -100,8 +100,8 @@ Content-Type: application/json
 
 ```json
 {
-    "status": 200,
-    "data": 259199
+  "status": 200,
+  "data": 259199
 }
 ```
 
@@ -109,8 +109,8 @@ Content-Type: application/json
 
 ```json
 {
-    "status": 401,
-    "error": "Authentication failed"
+  "status": 401,
+  "error": "Authentication failed"
 }
 ```
 
@@ -131,13 +131,9 @@ Content-Type: application/json
 
 ```json
 {
-    "uid": "108135",
-    "token": "a",
-    "data": [
-        "",
-        108135,
-        "224978"
-    ]
+  "uid": "108135",
+  "token": "a",
+  "data": ["", 108135, "224978"]
 }
 ```
 
@@ -147,20 +143,20 @@ Content-Type: application/json
 
 ```json
 {
-    "status": 200,
-    "data": {
-        "": {},
-        "108135": {
-            "text": "wxh",
-            "bg": "",
-            "fg": ""
-        },
-        "224978": {
-            "text": "o2",
-            "bg": "",
-            "fg": ""
-        }
+  "status": 200,
+  "data": {
+    "": {},
+    "108135": {
+      "text": "wxh",
+      "bg": "",
+      "fg": ""
+    },
+    "224978": {
+      "text": "o2",
+      "bg": "",
+      "fg": ""
     }
+  }
 }
 ```
 
@@ -180,23 +176,23 @@ Content-Type: application/j son
 
 ```json
 {
-    "uid": 108135,
-    "token": "0123456789abcdef0123456789abcdef",
-    "activation": "<exlgactivationkey>",
-    "data": {
-        "text": "wxh",
-        "bg": ""
-    }
+  "uid": 108135,
+  "token": "0123456789abcdef0123456789abcdef",
+  "activation": "<exlgactivationkey>",
+  "data": {
+    "text": "wxh",
+    "bg": ""
+  }
 }
 ```
 
 ```json
 {
-    "uid": 108135,
-    "token": "0123456789abcdef0123456789abcdef",
-    "data": {
-        "text": "wxh"
-    }
+  "uid": 108135,
+  "token": "0123456789abcdef0123456789abcdef",
+  "data": {
+    "text": "wxh"
+  }
 }
 ```
 
@@ -206,12 +202,12 @@ Content-Type: application/j son
 
 ```json
 {
-    "status": 200,
-    "data": {
-        "108135": {
-            "text": "wxh",
-            "bg": ""
-        }
+  "status": 200,
+  "data": {
+    "108135": {
+      "text": "wxh",
+      "bg": ""
     }
+  }
 }
 ```

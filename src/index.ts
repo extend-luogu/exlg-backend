@@ -1,4 +1,4 @@
-import EXLG from './app';
+import EXLG from "./app";
 
 const port = process.env.PORT || 3000;
 
