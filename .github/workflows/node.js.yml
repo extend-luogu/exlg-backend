@@ -28,7 +28,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 17.x]
+        node-version: [16.x, 17.x, 18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -46,15 +46,18 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
       - name: Install dependencies
-        run: |
-          pnpm install
-          pnpm add -g codecov
+        run: pnpm install
       - name: Build
-        run: pnpm run build
+        run: |
+          pnpm run build
+          pnpm -r run build
       - name: Lint with ESLint
         run: pnpm run lint
-      - name: Test with Jest
+      - name: Test with Jest & Vitest
         run: |
           pnpm run test --ci --coverage
-          cd admin && pnpm run test:unit && cd ..
-          codecov
+          pnpm -r run test:unit --coverage
+      - name: Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true
