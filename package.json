@@ -6,9 +6,13 @@
   "repository": "https://github.com/extend-luogu/exlg-backend.git",
   "author": "汪心禾 <wangxinhe06@gmail.com>",
   "license": "MIT",
-  "private": false,
+  "private": true,
   "scripts": {
+    "admin:dev": "cd admin && npm-run-all dev",
     "build": "tsc",
+    "dev": "run-p dev:watch admin:dev",
+    "dev:start": "pm2-dev ecosystem.config.cjs",
+    "dev:watch": "npm-run-all build -p 'build --watch --preserveWatchOutput' dev:start",
     "lint": "eslint --ext js,mjs,cjs,ts,vue .",
     "prepare": "husky install",
     "start": "node .",
@@ -36,9 +40,18 @@
     "husky": "^8.0.1",
     "jest": "^27.5.1",
     "lint-staged": "^13.0.1",
+    "npm-run-all": "^4.1.5",
+    "pm2": "^5.2.0",
     "prettier": "^2.6.2",
     "supertest": "^6.2.3",
     "ts-jest": "^27.1.5",
     "typescript": "^4.7.3"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "webpack"
+      ]
+    }
   }
 }
