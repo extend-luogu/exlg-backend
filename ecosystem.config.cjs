@@ -3,9 +3,9 @@ module.exports = {
     {
       name: "exlg",
       script: "./dist/index.js",
-      watch: true,
+      watch: ["dist"],
       env: {
-        PORT: 3000,
+        PORT: 3432,
         NODE_ENV: "development",
       },
       env_production: {

@@ -6,9 +6,13 @@
   "repository": "https://github.com/extend-luogu/exlg-backend.git",
   "author": "汪心禾 <wangxinhe06@gmail.com>",
   "license": "MIT",
-  "private": false,
+  "private": true,
   "scripts": {
+    "admin:dev": "cd admin && npm-run-all dev",
     "build": "tsc",
+    "dev": "run-p dev:watch admin:dev",
+    "dev:start": "pm2-dev ecosystem.config.cjs",
+    "dev:watch": "npm-run-all build -p 'build --watch --preserveWatchOutput' dev:start",
     "lint": "eslint --ext js,mjs,cjs,ts,vue .",
     "prepare": "husky install",
     "start": "node .",
@@ -27,9 +31,9 @@
     "@types/express": "^4.17.13",
     "@types/jest": "^27.5.2",
     "@types/supertest": "^2.0.12",
-    "@typescript-eslint/eslint-plugin": "^5.27.1",
-    "@typescript-eslint/parser": "^5.27.1",
-    "eslint": "^8.17.0",
+    "@typescript-eslint/eslint-plugin": "^5.29.0",
+    "@typescript-eslint/parser": "^5.29.0",
+    "eslint": "^8.18.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.5.0",
@@ -37,10 +41,19 @@
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "^8.0.1",
     "jest": "^27.5.1",
-    "lint-staged": "^13.0.1",
-    "prettier": "^2.6.2",
+    "lint-staged": "^13.0.2",
+    "npm-run-all": "^4.1.5",
+    "pm2": "^5.2.0",
+    "prettier": "^2.7.1",
     "supertest": "^6.2.3",
     "ts-jest": "^27.1.5",
-    "typescript": "^4.7.3"
+    "typescript": "^4.7.4"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "webpack"
+      ]
+    }
   }
 }
